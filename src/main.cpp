@@ -96,7 +96,13 @@ void usercontrol(void) {
   while (true) {
     if (!RemoteCodeEnabled) return;
 
-    // calculate the drivetrain motor velocities from the controller joystick axies
+    // ----- CONTROLLER INPUTS -----
+    bool L1_pressed = Controller1.ButtonL1.pressing();
+    bool L2_pressed = Controller1.ButtonL2.pressing();
+    bool R1_pressed = Controller1.ButtonR1.pressing();
+    bool R2_pressed = Controller1.ButtonR2.pressing();
+
+    // ----- DT CONTROL -----
     // left = Axis3 + Axis1
     // right = Axis3 - Axis1
     int leftSpeed = Controller1.Axis3.position() + Controller1.Axis1.position();
@@ -109,41 +115,37 @@ void usercontrol(void) {
     RD.setVelocity(rightSpeed, percent);
     RD.spin(forward);
   
-    //Right Arrow Key = Clear: False, LEFT = Out
-    if (Controller1.ButtonL1.pressing()) {
+    // ----- ARM -----
+    if (L1_pressed) {
       ARM.spin(forward, 100, pct);
-    } else if (Controller1.ButtonL2.pressing()) {
+    } else if (L2_pressed) {
       ARM.spin(reverse, 100, pct);
     } else {
       ARM.stop();
     }
 
-    // check the ButtonR1/ButtonR2 status to control lady_brown
-    if (Controller1.ButtonR1.pressing()) {
-      ROLLERS.spin(forward,100, pct);
-    } else if (Controller1.ButtonR2.pressing()) {
-      ROLLERS.spin(reverse,100,pct);
-    } else if (!Controller1LeftShoulderControlMotorsStopped) {
+    // ----- ROLLERS -----
+    if (R1_pressed) {
+      ROLLERS.spin(forward, 100, pct);
+    } else if (R2_pressed) {
+      ROLLERS.spin(reverse, 100, pct);
+    } else {
       ROLLERS.stop();
     }
 
-    // Sleep to prevent wasted resources.
     wait(20, msec);
   }
 }
 
-//
-// Main will set up the competition functions and callbacks.
-//
 int main() {
-  // Set up callbacks for autonomous and driver control periods.
+  // ----- REGISTER CALLBACKS -----
   Competition.autonomous(autonomous);
   Competition.drivercontrol(usercontrol);
 
   // Run the pre-autonomous function.
   pre_auton();
 
-  // Prevent main from exiting with an infinite loop.
+  // ----- INFINITELY BLOCK CODE (aka life support) -----
   while (true) {
     wait(100, msec);
   }
