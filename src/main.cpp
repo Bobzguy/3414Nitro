@@ -8,6 +8,7 @@
 /*----------------------------------------------------------------------------*/
 
 #include "vex.h"
+#include "Logo.h"
 
 using namespace vex;
 
@@ -19,26 +20,27 @@ controller Controller1 = controller(primary);
 
 // ----- LEFT MG ----- 
 motor LA = motor(PORT16, ratio6_1, true);
-motor LB = motor(PORT19, ratio6_1, true);
+motor LB = motor(PORT17, ratio6_1, true);
 motor_group LD = motor_group(LA, LB);
 
 // ----- RIGHT MG -----
-motor RA = motor(PORT11, ratio6_1, false);
-motor RB = motor(PORT15, ratio6_1, false);
+motor RA = motor(PORT19, ratio6_1, false);
+motor RB = motor(PORT20, ratio6_1, false);
 motor_group RD = motor_group(RA, RB);
 
 // ----- DT -----
 drivetrain Drivetrain = drivetrain(LD, RD);
 
 // ----- INTAKE ROLLERS -----
-motor ROLLERA = motor(PORT6, ratio6_1, false);
-motor ROLLERB = motor(PORT4, ratio6_1, true);
+motor ROLLERA = motor(PORT11, ratio6_1, false);
+motor ROLLERB = motor(PORT6, ratio6_1, true);
 motor_group ROLLERS = motor_group(ROLLERA, ROLLERB);
 
 // ----- ARM -----
-motor ARMR = motor(PORT12, ratio6_1, false);
-motor ARML = motor(PORT9, ratio6_1, true);
+motor ARMR = motor(PORT2, ratio6_1, false);
+motor ARML = motor(PORT1, ratio6_1, true);
 motor_group ARM = motor_group(ARMR, ARML);
+
 
 
 /*---------------------------------------------------------------------------*/
@@ -86,13 +88,8 @@ void autonomous(void) {
 
 void usercontrol(void) {
   bool RemoteCodeEnabled = true;
-  // define variables used for controlling motors based on controller inputs
-  bool Controller1LeftShoulderControlMotorsStopped = true;
-  bool Controller1RightShoulderControlMotorsStopped = true;
-  bool DrivetrainLNeedsToBeStopped_Controller1 = true;
-  bool DrivetrainRNeedsToBeStopped_Controller1 = true;
 
-  // process the controller input every 20 milliseconds
+  // ----- MAIN DRIVER LOOP (every 20 ms) -----
   while (true) {
     if (!RemoteCodeEnabled) return;
 
@@ -132,10 +129,11 @@ void usercontrol(void) {
     } else {
       ROLLERS.stop();
     }
-
-    wait(20, msec);
+    drawLogo();
+    wait(5, msec);
   }
 }
+
 
 int main() {
   // ----- REGISTER CALLBACKS -----

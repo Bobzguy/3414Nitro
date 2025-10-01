@@ -5,6 +5,7 @@
 
 #include "v5.h"
 #include "v5_vcs.h"
+#include "Logo.h"
 
 
 #define waitUntil(condition)                                                   \
@@ -14,3 +15,5 @@
 
 #define repeat(iterations)                                                     \
   for (int iterator = 0; iterator < iterations; iterator++)
+  
+extern vex::brain Brain;
