@@ -23,13 +23,11 @@ motor LA = motor(PORT16, ratio6_1, true);
 motor LB = motor(PORT17, ratio6_1, true);
 motor_group LD = motor_group(LA, LB);
 
+
 // ----- RIGHT MG -----
 motor RA = motor(PORT19, ratio6_1, false);
 motor RB = motor(PORT20, ratio6_1, false);
 motor_group RD = motor_group(RA, RB);
-
-// ----- DT -----
-drivetrain Drivetrain = drivetrain(LD, RD);
 
 // ----- INTAKE ROLLERS -----
 motor ROLLERA = motor(PORT11, ratio6_1, false);
