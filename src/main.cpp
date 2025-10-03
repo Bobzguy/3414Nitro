@@ -8,34 +8,37 @@
 /*----------------------------------------------------------------------------*/
 
 #include "vex.h"
+#include "Logo.h"
 
 using namespace vex;
 
-// A global instance of competition
+// ----- CONFIG -----
+
 competition Competition;
-
-// define your global instances of motors and other devices here
-brain  Brain;
-
-// VEXcode device constructors
+brain Brain;
 controller Controller1 = controller(primary);
+
+// ----- LEFT MG ----- 
 motor LA = motor(PORT16, ratio6_1, true);
-motor LB = motor(PORT19, ratio6_1, true);
+motor LB = motor(PORT17, ratio6_1, true);
 motor_group LD = motor_group(LA, LB);
 
-motor RA = motor(PORT11, ratio6_1, false);
-motor RB = motor(PORT15, ratio6_1, false);
+
+// ----- RIGHT MG -----
+motor RA = motor(PORT19, ratio6_1, false);
+motor RB = motor(PORT20, ratio6_1, false);
 motor_group RD = motor_group(RA, RB);
 
-drivetrain Drivetrain = drivetrain(LD, RD);
+// ----- INTAKE ROLLERS -----
+motor ROLLERA = motor(PORT11, ratio6_1, false);
+motor ROLLERB = motor(PORT6, ratio6_1, true);
+motor_group ROLLERS = motor_group(ROLLERA, ROLLERB);
 
-motor ROLLERA=motor(PORT6, ratio6_1, false);
-motor ROLLERB=motor(PORT4, ratio6_1, true);
-motor_group ROLLERS=motor_group(ROLLERA, ROLLERB);
+// ----- ARM -----
+motor ARMR = motor(PORT2, ratio6_1, false);
+motor ARML = motor(PORT1, ratio6_1, true);
+motor_group ARM = motor_group(ARMR, ARML);
 
-motor ARMR=motor(PORT12, ratio6_1, false);
-motor ARML=motor(PORT9, ratio6_1, true);
-motor_group ARM=motor_group(ARMR, ARML);
 
 
 /*---------------------------------------------------------------------------*/
@@ -49,7 +52,6 @@ motor_group ARM=motor_group(ARMR, ARML);
 /*---------------------------------------------------------------------------*/
 
 void pre_auton(void) {
-
   // All activities that occur before the competition starts
   // Example: clearing encoders, setting servo positions, ...
 }
@@ -83,117 +85,63 @@ void autonomous(void) {
 
 
 void usercontrol(void) {
-  // User control code here, inside the loop
-  while (1) {
-    bool RemoteControlCodeEnabled = true;
-// define variables used for controlling motors based on controller inputs
-bool Controller1LeftShoulderControlMotorsStopped = true;
-bool Controller1RightShoulderControlMotorsStopped = true;
-bool DrivetrainLNeedsToBeStopped_Controller1 = true;
-bool DrivetrainRNeedsToBeStopped_Controller1 = true;
-  // process the controller input every 20 milliseconds
-  while(true) {
-    if(RemoteControlCodeEnabled) {
-      // calculate the drivetrain motor velocities from the controller joystick axies
-      // left = Axis3 + Axis1
-      // right = Axis3 - Axis1
-      int drivetrainLeftSideSpeed = Controller1.Axis3.position() + Controller1.Axis1.position() ;
-      int drivetrainRightSideSpeed = Controller1.Axis3.position() - Controller1.Axis1.position()  ;
-      
-      // // check if the value is inside of the deadband range
-      // if (drivetrainLeftSideSpeed < 5 && drivetrainLeftSideSpeed > -5) {
-      //   // check if the left motor has already been stopped
-      //   if (DrivetrainLNeedsToBeStopped_Controller1) {
-      //     // stop the left drive motor
-      //     LeftDrivetrain.stop();
-      //     // tell the code that the left motor has been stopped
-      //     DrivetrainLNeedsToBeStopped_Controller1 = false;
-      //   }
-      // } else {
-      //   // reset the toggle so that the deadband code knows to stop the left motor nexttime the input is in the deadband range
-      //   DrivetrainLNeedsToBeStopped_Controller1 = true;
-      // }
-      // // check if the value is inside of the deadband range
-      // if (drivetrainRightSideSpeed < 5 && drivetrainRightSideSpeed > -5) {
-      //   // check if the right motor has already been stopped
-      //   if (DrivetrainRNeedsToBeStopped_Controller1) {
-      //     // stop the right drive motor
-      //     RightDrivetrain.stop();
-      //     // tell the code that the right motor has been stopped
-      //     DrivetrainRNeedsToBeStopped_Controller1 = false;
-      //   }
-      // } else {
-      //   // reset the toggle so that the deadband code knows to stop the right motor next time the input is in the deadband range
-      //   DrivetrainRNeedsToBeStopped_Controller1 = true;
-      // }
-      
-      // only tell the left drive motor to spin if the values are not in the deadband range
-      if (DrivetrainLNeedsToBeStopped_Controller1) {
-        LD.setVelocity(drivetrainLeftSideSpeed, percent);
-        LD.spin(forward);
-      }
-      // only tell the right drive motor to spin if the values are not in the deadband range
-      if (DrivetrainRNeedsToBeStopped_Controller1) {
-        RD.setVelocity(drivetrainRightSideSpeed, percent);
-        RD.spin(forward);
-      }
-      // check the ButtonL1/ButtonL2 status to control Intake
-        // Arm control with buttons L1 and L2
-      // Arm control with buttons L1 and L2
+  bool RemoteCodeEnabled = true;
 
-   
-      // ClampSet trigger, Button X to set true, Button B to set false
+  // ----- MAIN DRIVER LOOP (every 20 ms) -----
+  while (true) {
+    if (!RemoteCodeEnabled) return;
 
-// Trigger to ClampSet
-   
-    // wait before repeating the processprocess
-    wait(20, msec);
-    //Right Arrow Key = Clear: False, LEFT = Out
-    if (Controller1.ButtonL1.pressing()) {
-      ARM.spin(forward,100, pct);
-      Controller1LeftShoulderControlMotorsStopped = false;
-    } else if (Controller1.ButtonL2.pressing()) {
-      ARM.spin(reverse,100,pct);
-      Controller1LeftShoulderControlMotorsStopped = false;
-    } else if (!Controller1LeftShoulderControlMotorsStopped) {
-      ARM.stop();
-      // set the toggle so that we don't constantly tell the motor to stop when the buttons are released
-      Controller1LeftShoulderControlMotorsStopped = true;
-    }
-    // check the ButtonR1/ButtonR2 status to control lady_brown
-    if (Controller1.ButtonR1.pressing()) {
-      ROLLERS.spin(forward,100, pct);
-      Controller1LeftShoulderControlMotorsStopped = false;
-    } else if (Controller1.ButtonR2.pressing()) {
-      ROLLERS.spin(reverse,100,pct);
-      Controller1LeftShoulderControlMotorsStopped = false;
-    } else if (!Controller1LeftShoulderControlMotorsStopped) {
-      ROLLERS.stop();
-      // set the toggle so that we don't constantly tell the motor to stop when the buttons are released
-      Controller1LeftShoulderControlMotorsStopped = true;
-    }
-      // set the toggle so that we don't constantly tell the motor to stop when the buttons are released
-      Controller1RightShoulderControlMotorsStopped = true;
+    // ----- CONTROLLER INPUTS -----
+    bool L1_pressed = Controller1.ButtonL1.pressing();
+    bool L2_pressed = Controller1.ButtonL2.pressing();
+    bool R1_pressed = Controller1.ButtonR1.pressing();
+    bool R2_pressed = Controller1.ButtonR2.pressing();
+
+    // ----- DT CONTROL -----
+    // left = Axis3 + Axis1
+    // right = Axis3 - Axis1
+    int leftSpeed = Controller1.Axis3.position() + Controller1.Axis1.position();
+    int rightSpeed = Controller1.Axis3.position() - Controller1.Axis1.position();
+    
+    // TODO: Implement deadband
+    LD.setVelocity(leftSpeed, percent);
+    LD.spin(forward);
+
+    RD.setVelocity(rightSpeed, percent);
+    RD.spin(forward);
   
+    // ----- ARM -----
+    if (L1_pressed) {
+      ARM.spin(forward, 100, pct);
+    } else if (L2_pressed) {
+      ARM.spin(reverse, 100, pct);
+    } else {
+      ARM.stop();
+    }
 
-
-    wait(5, msec); // Sleep the task for a short amount of time to
-                    // prevent wasted resources.
-    }}}
+    // ----- ROLLERS -----
+    if (R1_pressed) {
+      ROLLERS.spin(forward, 100, pct);
+    } else if (R2_pressed) {
+      ROLLERS.spin(reverse, 100, pct);
+    } else {
+      ROLLERS.stop();
+    }
+    drawLogo();
+    wait(5, msec);
+  }
 }
 
-//
-// Main will set up the competition functions and callbacks.
-//
+
 int main() {
-  // Set up callbacks for autonomous and driver control periods.
+  // ----- REGISTER CALLBACKS -----
   Competition.autonomous(autonomous);
   Competition.drivercontrol(usercontrol);
 
   // Run the pre-autonomous function.
   pre_auton();
 
-  // Prevent main from exiting with an infinite loop.
+  // ----- INFINITELY BLOCK CODE (aka life support) -----
   while (true) {
     wait(100, msec);
   }
